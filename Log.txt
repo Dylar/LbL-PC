@@ -1,0 +1,17 @@
+14.12.13
+
+buttons:
+connect
+disconnect
+restart
+senden(grau) an alle (default)
+
+label pro device:
+aktuelle geste
+verbunden ?
+latenz
+name(IP, ID, name)
+
+Kontextmenu: devices- kick, ban, message
+
+
