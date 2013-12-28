@@ -35,29 +35,29 @@ public class FakeServer extends AbsServer{
 	}
 
 	protected void onStop() {
-		try {
-			// MAKE SURE YOU CLOSE THE SOCKET UPON EXITING
-			serverSocket.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			// MAKE SURE YOU CLOSE THE SOCKET UPON EXITING
+//			serverSocket.close();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 	}
 
 
-
-	@Override
-	public String getChatLog() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-
-	@Override
-	public void sendChatMessage(String s) {
-		// TODO Auto-generated method stub
-		
-	}
+//
+//	@Override
+//	public String getChatLog() {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+//
+//
+//
+//	@Override
+//	public void sendChatMessage(String s) {
+//		// TODO Auto-generated method stub
+//		
+//	}
 
 }
 //
