@@ -8,11 +8,13 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 
-import de.lbl.kb_bachelor_app.network.NetworkCommand;
 
 
 public class TCPServer {
@@ -26,11 +28,11 @@ public class TCPServer {
 
 	protected Thread acceptThread;
 	protected Thread serverOutputThread;
-	protected List<Thread> clientThreads;
+	protected HashMap<Integer, ClientThread> clientThreads;
 
 	public TCPServer() {
 		acceptThread = new Thread(new AcceptThread());
-		serverOutputThread = new Thread()
+		serverOutputThread = new Thread(new ServerOutputThread());
 	}
 
 	public void InitServer() {
@@ -38,16 +40,11 @@ public class TCPServer {
 		serverOutputThread.start();
 	}
 	
-	private void addNewConnection(Socket client) 
-	{
-
-	}
-	
-	private void pushCommandTo(int id, NetworkCommand nc)
+	public void pushCommand(NetworkCommand nc)
 	{
 		
 	}
-
+	
 	public class AcceptThread implements Runnable {
 
 		public void run() {
@@ -67,21 +64,55 @@ public class TCPServer {
 				e.printStackTrace();
 			}
 		}
+		
+		private void addNewConnection(Socket client) 
+		{
+			
+		}
 
 	}
 	
 	public class ServerOutputThread implements Runnable
 	{
 
+		public Queue<NetworkCommand> commands = new LinkedList<NetworkCommand>();
+		
 		@Override
 		public void run() {
 			while(true)
 			{
-				
+				while(!commands.isEmpty())
+				{
+					NetworkCommand nc = commands.poll();
+					int id = nc.getID();
+					switch (id) {
+					case -1:
+						pushCommandToAll(nc);
+						break;
+					default:
+						pushCommandTo(id, nc);
+						break;
+					}
+				}
 			}
-			
 		}
 		
+		private void pushCommandTo(int id, NetworkCommand nc)
+		{
+			ClientThread ct = clientThreads.get(id);
+			ct.commands.add(nc);
+		}
+		
+		private void pushCommandToAll(NetworkCommand nc)
+		{
+			Iterator<Entry<Integer, ClientThread>> iter = clientThreads.entrySet().iterator();
+			while (iter.hasNext()) {
+				Map.Entry<Integer, ClientThread> pairs = (Map.Entry<Integer, ClientThread>)iter.next();
+				Integer id = pairs.getKey();
+				pushCommandTo(id, nc);
+		        iter.remove(); // avoids a ConcurrentModificationException
+			}
+		}
 	}
 	
 
@@ -110,11 +141,11 @@ public class TCPServer {
 				while (true) {
 					try {
 
-						readInput(in);
+						readInput();
 						
 						System.out.println(TAG + ID + " Sending command.");
 						if (!commands.isEmpty()) {
-							writeOutput(out);
+							writeOutput(commands.poll());
 							out.flush();
 						} else
 							System.out.println(TAG + ID + " no commands");
@@ -129,23 +160,16 @@ public class TCPServer {
 			}
 		}
 
-		private void readInput(BufferedReader in) throws IOException {
+		private void readInput() throws IOException {
 			System.out.println(TAG + ID + " read income");
 			String line = in.readLine();
 			System.out.println(TAG + ID + " " + line);
 		}
 
-		private void writeOutput(PrintWriter out) {
+		private void writeOutput(NetworkCommand networkCommand) {
 			
 			System.out.println(TAG + ID + "write output");
 			out.println(TAG + "Hey Server! was geht sascha");
 		}
-	}
-
-
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-		
 	}
 }

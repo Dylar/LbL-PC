@@ -6,6 +6,7 @@ public class NetworkCommand
 		SENDMESSAGE,
 	}
 	
+	public int ID;
 	public Commands command;
 	public String message; 
 	
@@ -18,6 +19,10 @@ public class NetworkCommand
 	public void setCommand(NetworkCommand.Commands com)
 	{
 		this.command = com;
+	}
+
+	public int getID() {
+		return this.ID;
 	}
 	
 	
