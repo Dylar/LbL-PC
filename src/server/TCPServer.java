@@ -16,160 +16,246 @@ import java.util.Map.Entry;
 import java.util.Queue;
 
 
+public class TCPServer implements Server
+{
+	
+	public static void main(String... arg) {
+		Server s = new TCPServer();
+		s.startServer();
+		
+	}
 
-public class TCPServer {
 
-	public final static String TAG = "TCPServer: ";
+	public final static String					TAG	= "TCPServer: ";
+	public static int								idCount;
 
 	// DESIGNATE A PORT
-	public static final int SERVERPORT = 8080;
+	public int										serverport;
 
-	protected ServerSocket serverSocket;
+	private ServerSocket							serverSocket;
 
-	protected Thread acceptThread;
-	protected Thread serverOutputThread;
-	protected HashMap<Integer, ClientThread> clientThreads;
+	private Thread									acceptThread;
+	private Thread									serverOutputThread;
+	// private Thread serverInputThread;
+	private HashMap<Integer, ClientData>	connectedClients;
 
-	public TCPServer() {
+	private State									state;
+
+	private Queue<NetworkCommand>				outputCommands;
+
+
+	public TCPServer()
+	{
+		serverport = 8080;
+		state = State.STOPPED;
+	}
+
+
+	@Override
+	public void startServer()
+	{
 		acceptThread = new Thread(new AcceptThread());
 		serverOutputThread = new Thread(new ServerOutputThread());
-	}
+		// serverInputThread = new Thread(new ServerInputThread());
 
-	public void InitServer() {
+		outputCommands = new LinkedList<NetworkCommand>();
+		connectedClients = new HashMap<>();
+
 		acceptThread.start();
 		serverOutputThread.start();
+		// serverInputThread.start();
+
+		state = State.STARTED;
 	}
-	
-	public void pushCommand(NetworkCommand nc)
+
+	@Override
+	public void stopServer()
 	{
-		
+		state = State.STOPPED;
 	}
-	
-	public class AcceptThread implements Runnable {
 
-		public void run() {
-			try {
-				serverSocket = new ServerSocket(SERVERPORT);
+	public class AcceptThread implements Runnable
+	{
+		public void run()
+		{
+			try
+			{
+				serverSocket = new ServerSocket(serverport);
 				System.out.println(TAG + "started server");
-				while (true) {
-					// LISTEN FOR INCOMING CLIENTS
 
-					System.out.println(TAG + "wait for incoming connections");
+				while (state.equals(State.STARTED))
+				{
+					System.out.println(TAG + "waiting for incoming connections");
 					Socket client = serverSocket.accept();
 					addNewConnection(client);
-					System.out.println(TAG + "handle shit");
-
 				}
-			} catch (Exception e) {
+			}
+			catch (Exception e)
+			{
 				e.printStackTrace();
 			}
 		}
-		
-		private void addNewConnection(Socket client) 
-		{
-			
-		}
-
 	}
-	
+
+
+	private void addNewConnection(Socket client)
+	{
+		connectedClients.put(idCount, new ClientData(client));
+	}
+
 	public class ServerOutputThread implements Runnable
 	{
-
-		public Queue<NetworkCommand> commands = new LinkedList<NetworkCommand>();
-		
 		@Override
-		public void run() {
-			while(true)
+		public void run()
+		{
+			System.out.println(TAG + "waiting for output");
+			while (state.equals(State.STARTED))
 			{
-				while(!commands.isEmpty())
+				while (!outputCommands.isEmpty())
 				{
-					NetworkCommand nc = commands.poll();
+					NetworkCommand nc = getNextOutputCommand();
 					int id = nc.getID();
-					switch (id) {
-					case -1:
-						pushCommandToAll(nc);
-						break;
-					default:
-						pushCommandTo(id, nc);
-						break;
+					switch (id)
+					{
+						case -1:
+							pushCommandToAll(nc);
+							break;
+						default:
+							pushCommandToClient(id, nc);
+							break;
 					}
 				}
-			}
-		}
-		
-		private void pushCommandTo(int id, NetworkCommand nc)
-		{
-			ClientThread ct = clientThreads.get(id);
-			ct.commands.add(nc);
-		}
-		
-		private void pushCommandToAll(NetworkCommand nc)
-		{
-			Iterator<Entry<Integer, ClientThread>> iter = clientThreads.entrySet().iterator();
-			while (iter.hasNext()) {
-				Map.Entry<Integer, ClientThread> pairs = (Map.Entry<Integer, ClientThread>)iter.next();
-				Integer id = pairs.getKey();
-				pushCommandTo(id, nc);
-		        iter.remove(); // avoids a ConcurrentModificationException
 			}
 		}
 	}
-	
 
-	public class ClientThread implements Runnable {
 
-		public int ID;
-		public Socket client;
-		
-		public PrintWriter out;
-		public BufferedReader in;
-		
-		public Queue<NetworkCommand> commands = new LinkedList<NetworkCommand>();
+	public synchronized void addCommandToOutput(NetworkCommand nc)
+	{
+		// hier ist dann die schnittstelle von draußen
+		outputCommands.add(nc);
+	}
 
-		public ClientThread(int id, Socket client) {
+
+	private synchronized NetworkCommand getNextOutputCommand()
+	{
+		return outputCommands.poll();
+	}
+
+
+	private void pushCommandToClient(int id, NetworkCommand nc)
+	{
+		ClientData ct = connectedClients.get(id);
+		ct.addCommandToClient(nc);
+	}
+
+
+	private void pushCommandToAll(NetworkCommand nc)
+	{
+		Iterator<Entry<Integer, ClientData>> iter = connectedClients.entrySet().iterator();
+		while (iter.hasNext())
+		{
+			Map.Entry<Integer, ClientData> pairs = (Map.Entry<Integer, ClientData>) iter.next();
+			Integer id = pairs.getKey();
+			pushCommandToClient(id, nc);
+			iter.remove(); // avoids a ConcurrentModificationException
+		}
+	}
+
+	public class ClientData
+	{
+		public int							ID;
+		public Socket						client;
+
+		public PrintWriter				out;
+		public BufferedReader			in;
+
+		public Queue<NetworkCommand>	clientCommands;
+
+		public Thread						clientThread;
+
+
+		public ClientData(Socket client)
+		{
 			this.client = client;
-			ID = id;
+
+			clientCommands = new LinkedList<NetworkCommand>();
+			clientThread = new Thread(getNewClientRun());
+			clientThread.start();
+
 		}
 
-		public void run() {
-			try {
-				System.out.println(TAG + "started connection with ID: " + ID);
-				in = new BufferedReader(new InputStreamReader(
-						client.getInputStream()));
-				out = new PrintWriter(new BufferedWriter(
-						new OutputStreamWriter(client.getOutputStream())), true);
-				while (true) {
-					try {
 
-						readInput();
-						
-						System.out.println(TAG + ID + " Sending command.");
-						if (!commands.isEmpty()) {
-							writeOutput(commands.poll());
-							out.flush();
-						} else
-							System.out.println(TAG + ID + " no commands");
-
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		private void setID()
+		{
+			System.out.println(TAG + ID + " SetID");
+			this.ID = idCount++;
+			out.println(this.ID);
+			out.flush();
 		}
 
-		private void readInput() throws IOException {
+
+		private synchronized void readInput() throws IOException
+		{
+			// TODO
 			System.out.println(TAG + ID + " read income");
 			String line = in.readLine();
 			System.out.println(TAG + ID + " " + line);
 		}
 
-		private void writeOutput(NetworkCommand networkCommand) {
-			
+
+		private synchronized void writeOutput(NetworkCommand networkCommand)
+		{
+			// TODO
 			System.out.println(TAG + ID + "write output");
 			out.println(TAG + "Hey Server! was geht sascha");
 		}
+
+
+		public synchronized void addCommandToClient(NetworkCommand nc)
+		{
+			// hier ist dann die schnittstelle für den Server
+			clientCommands.add(nc);
+		}
+
+
+		private NetworkCommand getNextClientCommand()
+		{
+			return clientCommands.poll();
+		}
+
+
+		private Runnable getNewClientRun()
+		{
+			return new Runnable(){
+				public void run()
+				{
+					try
+					{
+						System.out.println(TAG + "started connection with ID: " + ID);
+						in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+						out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(client.getOutputStream())), true);
+						setID();
+						while (state.equals(State.STARTED))
+						{
+							readInput();
+
+							if (!clientCommands.isEmpty())
+							{
+								System.out.println(TAG + ID + " Sending command.");
+								writeOutput(getNextClientCommand());
+								out.flush();
+							}
+						}
+
+					}
+					catch (Exception e)
+					{
+						e.printStackTrace();
+					}
+				}
+			};
+		}
+
 	}
 }
