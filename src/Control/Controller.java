@@ -2,16 +2,22 @@ package Control;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import network.NetworkCommand;
+import network.Server;
+import network.TCPServer;
 import network.gui.MainGui;
-import server.NetworkCommand;
-import server.Server;
-import server.TCPServer;
 
 
 public class Controller{
 
 	public final static String TAG = "Controller: ";
-
+	
+	public static final int GETID = 0;
+	public static final int SENDMESSAGE = 1;
+	public static final int STARTSERVER = 2;
+	public static final int STOPSERVER = 3;
+	public static final int GETMESSAGE = 4;
+	
 	public Server server;
 	public MainGui gui;
 	
@@ -50,7 +56,7 @@ public class Controller{
 									break;
 								case 2://start server
 									startServer();
-									gui.set
+									//TODO gui.setMeldung b lubb was auch immer
 									break;
 								case 3://stop server
 									stopServer();
