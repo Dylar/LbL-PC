@@ -1,13 +1,10 @@
-package server;
+package network;
 
 public class NetworkCommand
 {
-	public enum Commands{
-		SENDMESSAGE,
-	}
 	
 	public int ID;
-	public Commands command;
+	public int command;
 	public String message; 
 	
 	
@@ -16,7 +13,7 @@ public class NetworkCommand
 		this.message = m;
 	}
 
-	public void setCommand(NetworkCommand.Commands com)
+	public void setCommand(int com)
 	{
 		this.command = com;
 	}
@@ -24,7 +21,4 @@ public class NetworkCommand
 	public int getID() {
 		return this.ID;
 	}
-	
-	
-	
 }

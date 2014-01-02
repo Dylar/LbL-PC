@@ -1,4 +1,4 @@
-package server;
+package network;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -15,20 +15,23 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
 
+import Control.ControlAction;
+import Control.Controller;
 
 public class TCPServer implements Server
 {
-	
-	public static void main(String... arg) {
-		Server s = new TCPServer();
-		s.startServer();
-		
-	}
 
+	public static void main(String... arg)
+	{
+		Controller c = new Controller(null);
+		c.server.startServer();
+
+	}
 
 	public final static String					TAG	= "TCPServer: ";
 	public static int								idCount;
 
+	public Controller								ctrl;
 	// DESIGNATE A PORT
 	public int										serverport;
 
@@ -44,12 +47,18 @@ public class TCPServer implements Server
 	private Queue<NetworkCommand>				outputCommands;
 
 
-	public TCPServer()
+	public TCPServer(Controller ctrl)
 	{
+		this.ctrl = ctrl;
 		serverport = 8080;
 		state = State.STOPPED;
 	}
 
+	@Override
+	public State getState()
+	{
+		return state;
+	}
 
 	@Override
 	public void startServer()
@@ -67,6 +76,7 @@ public class TCPServer implements Server
 
 		state = State.STARTED;
 	}
+
 
 	@Override
 	public void stopServer()
@@ -199,8 +209,22 @@ public class TCPServer implements Server
 		{
 			// TODO
 			System.out.println(TAG + ID + " read income");
-			String line = in.readLine();
-			System.out.println(TAG + ID + " " + line);
+			ControlAction ca = ctrl.getNewAction();
+			ca.setAction(Integer.valueOf(in.readLine()));
+			switch (ca.action)
+			{
+				case 0://Get ID
+					break;
+				case 1: //send Message
+					
+					break;
+				case 5: //get message
+					
+				default:
+					break;
+			}
+			ctrl.scheduleAction(ca);
+//			System.out.println(TAG + ID + " " + line);
 		}
 
 

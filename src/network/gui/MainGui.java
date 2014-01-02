@@ -1,4 +1,4 @@
-package server.gui;
+package network.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -31,7 +31,9 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.LineBorder;
 
-import server.Server;
+import network.Server;
+import Control.ControlAction;
+import Control.Controller;
 
 /**
  * @date 16.12.2013
@@ -40,8 +42,8 @@ import server.Server;
 public class MainGui extends JFrame implements ActionListener {
 
 	// JFrame mainFrame;
-	private Server server;
-	double LUTSCHMEINEEIER = 3.50;
+	private Controller ctrl;
+	
 	final private JTextArea serverHistory = new JTextArea(5, 16);
 	final private JTextArea chatHistory = new JTextArea(5, 5);
 	final private JTextField userInputField = new JTextField(50);
@@ -203,6 +205,7 @@ public class MainGui extends JFrame implements ActionListener {
 		validate();
 	}
 
+	//bei connect von client 
 	private JPanel deviceInformation() {
 		
 		deviceIterator++;
@@ -258,14 +261,10 @@ public class MainGui extends JFrame implements ActionListener {
 		}// end if
 
 		if (e.getActionCommand().equals("ACTION_COMMAND_CONNECT")) {
-			// TODO WENN der server connected -> ausgabe if() {
-			//
-			// }
-			serverHistory.append("Mit dem Server verbunden!");
-			serverHistory.append(PLACEHOLDER);
-			serverHealth.setBackground(new Color(0, 180, 0));
-			deviceInformation();
-		}// end if
+			ControlAction ca = ctrl.getNewAction();
+			ca.setAction(Controller.STARTSERVER);
+			ctrl.scheduleAction(ca); //TODO
+		}
 
 		if (e.getActionCommand().equals("ACTION_COMMAND_DISCONNECT")) {
 			// TODO WENN nicht mehr verbunden mit dem server -> ausgabe
@@ -293,7 +292,19 @@ public class MainGui extends JFrame implements ActionListener {
 
 		}
 	}
+	
+	public void setServerHistory(String s)
+	{
+		String PLACEHOLDER = " _____________\n";
+		serverHistory.append(s);
+		serverHistory.append(PLACEHOLDER);
+		
+	}
 
+	public void setServerHealth(boolean b)
+	{
+		serverHealth.setBackground(new Color(0, 180, 0));
+	}
 	private void menuBar() {
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
@@ -335,9 +346,9 @@ public class MainGui extends JFrame implements ActionListener {
 		}
 	}
 
-	public static void main(String... arg) {
-		MainGui.systemLookandFeel();
-		new MainGui();
-
-	}
+//	public static void main(String... arg) {
+//		MainGui.systemLookandFeel();
+//		new MainGui();
+//
+//	}
 }
