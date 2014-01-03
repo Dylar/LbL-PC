@@ -54,34 +54,27 @@ public class Controller{
 			});
 	}
 
-	public void scheduleAction(ControlAction ac)
-	{
+	public void scheduleAction(ControlAction ac) {
 		schedule.add(ac);
 	}
 
-	private void startServer()
-	{
-		System.out.println(TAG +"try server start ");
-		if (server.getState().equals(Server.State.STOPPED))
-		{ 
-				server.startServer();
-				//TODO gui.setStatus etc
-		}
-		else
-		{
-			String m = "allready started";	
-			System.out.println(TAG +m);
+	private void startServer() {
+		System.out.println(TAG + "try server start ");
+		if (server.getState().equals(Server.State.STOPPED)) {
+			server.startServer();
+			// TODO gui.setStatus etc
+		} else {
+			String m = "allready started";
+			System.out.println(TAG + m);
 		}
 	}
 
-	private void stopServer()
-	{
-		System.out.println(TAG +"stop server");
+	private void stopServer() {
+		System.out.println(TAG + "stop server");
 		server.stopServer();
 	}
 
-	private void sendChatMessage(String m)
-	{
+	private void sendChatMessage(String m) {
 		NetworkCommand nc = getNewNetworkCommand();
 		nc.setCommand(SENDMESSAGE);
 		nc.setMessage(m);
@@ -99,9 +92,9 @@ public class Controller{
 //		});
 //	}
 
-	public ControlAction getNewAction()
-	{
-		// TODO: Hier ne Fabrik + pool bauen damit wir die objecte immer wieder verwenden 
+	public ControlAction getNewAction() {
+		// TODO: Hier ne Fabrik + pool bauen damit wir die objecte immer wieder
+		// verwenden
 		return new ControlAction();
 	}
 
@@ -110,8 +103,7 @@ public class Controller{
 		//TODO H
 	}
 
-	private NetworkCommand getNewNetworkCommand()
-	{
+	private NetworkCommand getNewNetworkCommand() {
 		// TODO: auch hier ne fabrik
 		return new NetworkCommand();
 	}
