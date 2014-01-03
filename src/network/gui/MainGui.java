@@ -303,7 +303,6 @@ public class MainGui extends JFrame implements ActionListener {
 
 		if (e.getActionCommand().equals("ACTION_COMMAND_CLOSE")) {
 			System.exit(EXIT_ON_CLOSE);
-
 		}
 	}
 	
