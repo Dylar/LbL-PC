@@ -24,10 +24,11 @@ public class Controller{
 	Queue<ControlAction> schedule;
 	Thread scheThread;
 
-	public Controller(MainGui gui)
+	public Controller()
 	{
-		this.gui = gui;
-		server = new TCPServer(this);
+		server = new TCPServer();
+		server.addController(this);
+		this.gui = new MainGui();
 		schedule = new LinkedList<ControlAction>();
 		scheThread = newScheduleThread();
 		scheThread.start();
@@ -45,24 +46,7 @@ public class Controller{
 						{
 							System.out.println(TAG +"Try next scheduled action");
 							ControlAction ca = schedule.poll();
-							switch (ca.action)
-							{
-								case 0: //get ID
-									
-									break;
-								case 1: //SEND MESSAGE
-									String m = ca.message;
-									sendChatMessage(m);
-									break;
-								case 2://start server
-									startServer();
-									//TODO gui.setMeldung b lubb was auch immer
-									break;
-								case 3://stop server
-									stopServer();
-									break;
-								case 5:break;
-							}
+							tryAction(ca);
 							addToPool(ca);
 						}
 					}
@@ -121,7 +105,7 @@ public class Controller{
 		return new ControlAction();
 	}
 
-	public void addToPool(ControlAction ca)
+	private void addToPool(ControlAction ca)
 	{
 		//TODO H
 	}
@@ -132,9 +116,26 @@ public class Controller{
 		return new NetworkCommand();
 	}
 
-	public void tryAction(ControlAction ac)
+	private void tryAction(ControlAction ca)
 	{
-		// TODO: Implement this method
+		switch (ca.action)
+		{
+			case 0: //get ID
+				
+				break;
+			case 1: //SEND MESSAGE
+				String m = ca.message;
+				sendChatMessage(m);
+				break;
+			case 2://start server
+				startServer();
+				//TODO gui.setMeldung blubb was auch immer
+				break;
+			case 3://stop server
+				stopServer();
+				break;
+			case 5:break;
+		}
 	}
 	
 }

@@ -212,7 +212,7 @@ public class MainGui extends JFrame implements ActionListener {
 		if(deviceIterator <= 10) {
 		JPanel devicePanel = new JPanel();
 		devicePanel.setLayout(new BoxLayout(devicePanel, BoxLayout.Y_AXIS));
-		JLabel deviceName = new JLabel("Gerï¿½tename: ");
+		JLabel deviceName = new JLabel("Geraetename: ");
 		JLabel deviceLatency = new JLabel("Latenz:");
 		JLabel deviceVariable = new JLabel("Platzhalter");
 		devicePanel.setSize(new Dimension(200,60));
@@ -263,14 +263,21 @@ public class MainGui extends JFrame implements ActionListener {
 		if (e.getActionCommand().equals("ACTION_COMMAND_CONNECT")) {
 			ControlAction ca = ctrl.getNewAction();
 			ca.setAction(Controller.STARTSERVER);
-			ctrl.scheduleAction(ca); //TODO
+			tryAction(ca);
+			//TODO Server message an die GUI, in die ServerHistory!
+			//"Server ist gestartet" oder was da reinkommt...
 		}
 
 		if (e.getActionCommand().equals("ACTION_COMMAND_DISCONNECT")) {
-			// TODO WENN nicht mehr verbunden mit dem server -> ausgabe
-			serverHistory.append("Verbindung zum Server unterbrochen!");
-			serverHistory.append(PLACEHOLDER);
-			serverHealth.setBackground(Color.RED);
+			// TODO WENN nicht mehr verbunden mit dem server -> ausgabe oder
+			//wenn disconnect gedrückt würde
+			ControlAction ca = ctrl.getNewAction();
+			ca.setAction(Controller.STOPSERVER);
+			tryAction(ca);
+			//TODO genauso hier. möglichst wie unten
+//			serverHistory.append("Verbindung zum Server unterbrochen!");
+//			serverHistory.append(PLACEHOLDER);
+//			serverHealth.setBackground(Color.RED);
 		}// end if
 
 		if (e.getActionCommand().equals("ACTION_COMMAND_RESET")) {
@@ -281,8 +288,15 @@ public class MainGui extends JFrame implements ActionListener {
 					JOptionPane.DEFAULT_OPTION, null, options, options[1]);
 
 			if (choice == 0) {
-				serverHistory.append("Server wird neu gestartet!");
-				serverHistory.append(PLACEHOLDER);
+				ControlAction ca = ctrl.getNewAction();
+				ca.setAction(Controller.STOPSERVER);
+				tryAction(ca);
+				ca.setAction(Controller.STARTSERVER);
+				tryAction(ca);
+				//TODO same procedure as every method? YES as EVERY method
+				//extra abfrage noch integrieren ?
+//				serverHistory.append("Server wird neu gestartet!");
+//				serverHistory.append(PLACEHOLDER);
 				// TODO Was passiert, wenn der server neugestartet werden soll
 			}
 		}// end if
@@ -291,6 +305,11 @@ public class MainGui extends JFrame implements ActionListener {
 			System.exit(EXIT_ON_CLOSE);
 
 		}
+	}
+	
+	public void tryAction(ControlAction ca)
+	{
+		ctrl.scheduleAction(ca);
 	}
 	
 	public void setServerHistory(String s)
@@ -345,10 +364,4 @@ public class MainGui extends JFrame implements ActionListener {
 			System.err.println("Illegal Acces Exception!");
 		}
 	}
-
-//	public static void main(String... arg) {
-//		MainGui.systemLookandFeel();
-//		new MainGui();
-//
-//	}
 }

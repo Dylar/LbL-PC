@@ -1,5 +1,7 @@
 package network;
 
+import Control.Controller;
+
 public interface Server
 {
 
@@ -17,4 +19,6 @@ public interface Server
 	public void stopServer();
 	
 	public State getState();
+	
+	public void addController(Controller controller);
 }

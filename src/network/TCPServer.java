@@ -23,7 +23,7 @@ public class TCPServer implements Server
 
 	public static void main(String... arg)
 	{
-		Controller c = new Controller(null);
+		Controller c = new Controller();
 		c.server.startServer();
 
 	}
@@ -47,11 +47,22 @@ public class TCPServer implements Server
 	private Queue<NetworkCommand>				outputCommands;
 
 
-	public TCPServer(Controller ctrl)
+	public TCPServer()
 	{
-		this.ctrl = ctrl;
 		serverport = 8080;
 		state = State.STOPPED;
+	}
+
+
+	@Override
+	public void addController(Controller controller)
+	{
+		this.ctrl = controller;
+	}
+
+	public void tryAction(ControlAction ca)
+	{
+		ctrl.scheduleAction(ca);
 	}
 
 	@Override
@@ -59,6 +70,7 @@ public class TCPServer implements Server
 	{
 		return state;
 	}
+
 
 	@Override
 	public void startServer()
@@ -142,7 +154,7 @@ public class TCPServer implements Server
 
 	public synchronized void addCommandToOutput(NetworkCommand nc)
 	{
-		// hier ist dann die schnittstelle von draußen
+		// TODO hier ist dann die schnittstelle von draußen
 		outputCommands.add(nc);
 	}
 
@@ -198,10 +210,8 @@ public class TCPServer implements Server
 
 		private void setID()
 		{
-			System.out.println(TAG + ID + " SetID");
 			this.ID = idCount++;
-			out.println(this.ID);
-			out.flush();
+			System.out.println(TAG + ID + " SetID");
 		}
 
 
@@ -213,24 +223,27 @@ public class TCPServer implements Server
 			ca.setAction(Integer.valueOf(in.readLine()));
 			switch (ca.action)
 			{
-				case 0://Get ID
+				case 0:// Get ID
+
 					break;
-				case 1: //send Message
-					
+				case 1: // send Message
+
 					break;
-				case 5: //get message
-					
+				case 5: // get message
+
+					break;
 				default:
 					break;
 			}
-			ctrl.scheduleAction(ca);
-//			System.out.println(TAG + ID + " " + line);
+			
+			tryAction(ca);
+			// System.out.println(TAG + ID + " " + line);
 		}
 
 
 		private synchronized void writeOutput(NetworkCommand networkCommand)
 		{
-			// TODO
+			// TODO output schreiben
 			System.out.println(TAG + ID + "write output");
 			out.println(TAG + "Hey Server! was geht sascha");
 		}
@@ -238,7 +251,7 @@ public class TCPServer implements Server
 
 		public synchronized void addCommandToClient(NetworkCommand nc)
 		{
-			// hier ist dann die schnittstelle für den Server
+			// TODO hier ist dann die schnittstelle für den Server
 			clientCommands.add(nc);
 		}
 
@@ -259,7 +272,6 @@ public class TCPServer implements Server
 						System.out.println(TAG + "started connection with ID: " + ID);
 						in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 						out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(client.getOutputStream())), true);
-						setID();
 						while (state.equals(State.STARTED))
 						{
 							readInput();
@@ -282,4 +294,5 @@ public class TCPServer implements Server
 		}
 
 	}
+
 }
