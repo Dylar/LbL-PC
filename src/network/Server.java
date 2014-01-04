@@ -1,8 +1,9 @@
 package network;
 
-import Control.Controller;
+import Control.ControlListener;
 
-public interface Server
+
+public interface Server extends ControlListener
 {
 
 	public enum State
@@ -20,5 +21,4 @@ public interface Server
 	
 	public State getState();
 	
-	public void addController(Controller controller);
 }

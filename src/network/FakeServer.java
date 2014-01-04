@@ -1,10 +1,5 @@
 package network;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Enumeration;
 
 public class FakeServer{
 
@@ -16,23 +11,23 @@ public class FakeServer{
 	
 
 	// GETS THE IP ADDRESS OF YOUR PHONE'S NETWORK
-	private String getLocalIpAddress() {
-		try {
-			for (Enumeration<NetworkInterface> en = NetworkInterface
-					.getNetworkInterfaces(); en.hasMoreElements();) {
-				NetworkInterface intf = en.nextElement();
-				for (Enumeration<InetAddress> enumIpAddr = intf
-						.getInetAddresses(); enumIpAddr.hasMoreElements();) {
-					InetAddress inetAddress = enumIpAddr.nextElement();
-					if (!inetAddress.isLoopbackAddress()) {
-						return inetAddress.getHostAddress().toString();
-					}
-				}
-			}
-		} catch (SocketException ex) {
-		}
-		return null;
-	}
+//	private String getLocalIpAddress() {
+//		try {
+//			for (Enumeration<NetworkInterface> en = NetworkInterface
+//					.getNetworkInterfaces(); en.hasMoreElements();) {
+//				NetworkInterface intf = en.nextElement();
+//				for (Enumeration<InetAddress> enumIpAddr = intf
+//						.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+//					InetAddress inetAddress = enumIpAddr.nextElement();
+//					if (!inetAddress.isLoopbackAddress()) {
+//						return inetAddress.getHostAddress().toString();
+//					}
+//				}
+//			}
+//		} catch (SocketException ex) {
+//		}
+//		return null;
+//	}
 
 	protected void onStop() {
 //		try {

@@ -3,7 +3,7 @@ package network;
 public class NetworkCommand
 {
 	
-	public int ID;
+	public int ID = -1;
 	public int command;
 	public String message; 
 	
@@ -18,7 +18,16 @@ public class NetworkCommand
 		this.command = com;
 	}
 
+	public void setID(int id)
+	{
+		this.ID = id;
+	}
 	public int getID() {
 		return this.ID;
+	}
+
+	public int getCommand()
+	{
+		return command;
 	}
 }

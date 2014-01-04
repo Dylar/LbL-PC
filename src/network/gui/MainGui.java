@@ -31,15 +31,16 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.LineBorder;
 
-import network.Server;
 import Control.ControlAction;
+import Control.ControlHandler;
+import Control.ControlListener;
 import Control.Controller;
 
 /**
  * @date 16.12.2013
  * @time 22:23
  */
-public class MainGui extends JFrame implements ActionListener {
+public class MainGui extends JFrame implements ControlListener,ActionListener {
 
 	// JFrame mainFrame;
 	private Controller ctrl;
@@ -235,10 +236,6 @@ public class MainGui extends JFrame implements ActionListener {
 	}
 	
 	public void actionPerformed(ActionEvent e) {// TODO Das ganze kann bzw soll in den controller... in der GUIkeine "logik" sondern nur infos fÃ¼r den controller(also das command enfch eeitercgebb ) guck dir dss beim clientact und controller in der app an
-		String PLACEHOLDER = " _____________\n";
-		
-		
-
 		
 		if (e.getActionCommand().equals("ACTION_COMMAND_SEND")) {
 			final String fromUser = userInputField.getText();
@@ -262,7 +259,7 @@ public class MainGui extends JFrame implements ActionListener {
 
 		if (e.getActionCommand().equals("ACTION_COMMAND_CONNECT")) {
 			ControlAction ca = ctrl.getNewAction();
-			ca.setAction(Controller.STARTSERVER);
+			ca.setAction(Controller.START_SERVER);
 			tryAction(ca);
 			//TODO Server message an die GUI, in die ServerHistory!
 			//"Server ist gestartet" oder was da reinkommt...
@@ -272,7 +269,7 @@ public class MainGui extends JFrame implements ActionListener {
 			// TODO WENN nicht mehr verbunden mit dem server -> ausgabe oder
 			//wenn disconnect gedrückt würde
 			ControlAction ca = ctrl.getNewAction();
-			ca.setAction(Controller.STOPSERVER);
+			ca.setAction(Controller.STOP_SERVER);
 			tryAction(ca);
 			//TODO genauso hier. möglichst wie unten
 //			serverHistory.append("Verbindung zum Server unterbrochen!");
@@ -289,9 +286,9 @@ public class MainGui extends JFrame implements ActionListener {
 
 			if (choice == 0) {
 				ControlAction ca = ctrl.getNewAction();
-				ca.setAction(Controller.STOPSERVER);
+				ca.setAction(Controller.STOP_SERVER);
 				tryAction(ca);
-				ca.setAction(Controller.STARTSERVER);
+				ca.setAction(Controller.START_SERVER);
 				tryAction(ca);
 				//TODO same procedure as every method? YES as EVERY method
 				//extra abfrage noch integrieren ?
@@ -362,5 +359,12 @@ public class MainGui extends JFrame implements ActionListener {
 		} catch (IllegalAccessException e) {
 			System.err.println("Illegal Acces Exception!");
 		}
+	}
+
+	@Override
+	public void addController(ControlHandler ah)
+	{
+		// TODO Auto-generated method stub
+		
 	}
 }

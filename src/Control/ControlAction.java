@@ -10,6 +10,8 @@ public class ControlAction
 	public int serverPort;
 
 	public String message;
+	
+	public int ID;
 
 	public void setMessage(String message)
 	{
@@ -29,5 +31,15 @@ public class ControlAction
 	public void setIpAddress(String serverIpAddress)
 	{
 		this.serverIp = serverIpAddress;
+	}
+
+	public void setID(int id)
+	{
+		this.ID = id;
+	}
+
+	public int getID()
+	{
+		return ID;
 	}
 }
