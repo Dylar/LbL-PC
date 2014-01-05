@@ -11,25 +11,26 @@ import network.gui.MainGui;
 public class Controller implements ControlHandler
 {
 
-	public final static String	TAG				= "Controller: ";
+	public final static String	TAG	= "Controller: ";
 
 	public Server					server;
 	public MainGui					gui;
 
 	Queue<ControlAction>			schedule;
-	Thread							scheThread;
+	Thread							actionThread;
 
 
 	public Controller()
 	{
 		this.server = new TCPServer();
 		this.server.addController(this);
+
 		this.gui = new MainGui();
 		this.gui.addController(this);
 
 		schedule = new LinkedList<ControlAction>();
-		scheThread = newScheduleThread();
-		scheThread.start();
+		actionThread = newScheduleThread();
+		actionThread.start();
 	}
 
 
@@ -39,6 +40,7 @@ public class Controller implements ControlHandler
 			@Override
 			public void run()
 			{
+				// waiting();
 				while (true)
 				{
 					while (!schedule.isEmpty())
@@ -47,7 +49,28 @@ public class Controller implements ControlHandler
 						ControlAction ca = schedule.poll();
 						tryAction(ca);
 						addToPool(ca);
+
+						// waiting();
 					}
+				}
+			}
+
+
+			private void waiting()
+			{
+				try
+				{
+					synchronized (actionThread)
+					{
+						System.out.println("Warten");
+						actionThread.wait();
+						System.out.println("warten ende");
+					}
+				}
+				catch (InterruptedException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 		});
@@ -58,6 +81,17 @@ public class Controller implements ControlHandler
 	public void scheduleAction(ControlAction ac)
 	{
 		schedule.add(ac);
+
+		// synchronized (actionThread)
+		// {
+		// actionThread.notify();
+		// }
+		// if (actionThread == null)
+		// {
+		// actionThread = newScheduleThread();
+		// actionThread.start();
+		//
+		// }
 	}
 
 
