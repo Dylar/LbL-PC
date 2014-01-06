@@ -290,7 +290,8 @@ public class TCPServer implements Server
 						
 						while (state.equals(State.STARTED))
 						{
-							readInput();
+							if(in.ready())
+								readInput();
 
 							if (!clientCommands.isEmpty())
 							{

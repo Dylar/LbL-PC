@@ -40,25 +40,30 @@ import Control.Controller;
  * @date 16.12.2013
  * @time 22:23
  */
-public class MainGui extends JFrame implements ControlListener,ActionListener {
+public class MainGui extends JFrame implements ControlListener,ActionListener
+{
 
 	// JFrame mainFrame;
-	private Controller ctrl;
-	
-	final private JTextArea serverHistory = new JTextArea(5, 16);
-	final private JTextArea chatHistory = new JTextArea(5, 5);
-	final private JTextField userInputField = new JTextField(50);
-	private JLabel serverHealth;
-	private JPanel innerCenterUpperPanel;
-	private int deviceIterator = 0;
-	
-	public MainGui() {
+	private ControlHandler		ctrl;
+
+	final private JTextArea		serverHistory	= new JTextArea(5, 16);
+	final private JTextArea		chatHistory		= new JTextArea(5, 5);
+	final private JTextField	userInputField	= new JTextField(50);
+	private JLabel					serverHealth;
+	private JPanel					innerCenterUpperPanel;
+	private int						deviceIterator	= 0;
+
+
+	public MainGui()
+	{
 		mainFrame();
 		menuBar();
 		initMainFrame();
 	}
 
-	private void mainFrame() {
+
+	private void mainFrame()
+	{
 		// Fenster initialisieren
 		setTitle("LbL Server - Best Servers in the World!");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -69,14 +74,14 @@ public class MainGui extends JFrame implements ControlListener,ActionListener {
 
 		// TODO ServerHistory Font options
 		Font f = serverHistory.getFont();
-		Font serverFont = new Font(f.getFontName(), f.getStyle(),
-				f.getSize() - 1);
+		Font serverFont = new Font(f.getFontName(), f.getStyle(), f.getSize() - 1);
 		serverHistory.setFont(serverFont);
 		serverHistory.setForeground(Color.RED);
 	}
 
-	
-	private void initMainFrame() {
+
+	private void initMainFrame()
+	{
 		// mainPane initialisieren
 		JPanel mainPane = new JPanel();
 		mainPane.setLayout(new BorderLayout());
@@ -90,7 +95,7 @@ public class MainGui extends JFrame implements ControlListener,ActionListener {
 		JPanel rightUpperButtonPanel = new JPanel();
 		JPanel rightMiddlePanel = new JPanel();
 		JPanel rightLowerPanel = new JPanel();
-		
+
 		JPanel leftPanel = new JPanel();
 
 		// Center Panel
@@ -115,8 +120,7 @@ public class MainGui extends JFrame implements ControlListener,ActionListener {
 		// TODO creating Buttons to rightUpperPanel
 		JLabel serverInfoLabel = new JLabel("Server information:");
 		JLabel serverConnection = new JLabel("Mit Server verbunden?");
-		
-		
+
 		JButton connectButton = new JButton("Connect");// das ist "Start"
 		JButton disconnectButton = new JButton("Disconnect");// das ist "Stop"
 		JButton restartButton = new JButton("Restart");
@@ -139,15 +143,12 @@ public class MainGui extends JFrame implements ControlListener,ActionListener {
 		innerCenterLowerPanel.add(userInputPanel, BorderLayout.SOUTH);
 		userInputPanel.add(userInputField, BorderLayout.CENTER);
 
-		
-		
 		// Scrollpanes for the Server message panel and chatbox
 		JScrollPane chatScroll = new JScrollPane(chatHistory);
 		chatHistory.setLineWrap(true);
 		chatHistory.setWrapStyleWord(true);
 		chatHistory.setEditable(false);
-		chatScroll
-				.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		chatScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		innerCenterLowerPanel.add(chatBoxPanel, BorderLayout.NORTH);
 		chatBoxPanel.add(chatScroll, BorderLayout.CENTER);
 
@@ -155,16 +156,13 @@ public class MainGui extends JFrame implements ControlListener,ActionListener {
 		serverHistory.setLineWrap(true);
 		serverHistory.setWrapStyleWord(true);
 		serverHistory.setEditable(false);
-		scrollPane
-				.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		rightMiddlePanel.add(scrollPane, SwingConstants.CENTER);
 
 		// TODO invisible Borders
 		// TOP, LEFT, BOT, RIGHT
-		rightMiddlePanel
-				.setBorder(BorderFactory.createEmptyBorder(10, 1, 4, 1));
-		innerCenterLowerPanel.setBorder(BorderFactory.createEmptyBorder(0, 5,
-				0, 5));
+		rightMiddlePanel.setBorder(BorderFactory.createEmptyBorder(10, 1, 4, 1));
+		innerCenterLowerPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
 		rightPanel.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 3));
 		rightLowerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
 		userInputPanel.setBorder(BorderFactory.createEmptyBorder(3, 0, 4, 0));
@@ -172,10 +170,10 @@ public class MainGui extends JFrame implements ControlListener,ActionListener {
 		innerCenterUpperPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 0, 5));
 
 		// TODO Adding buttons to Panels
-		serverHealth  = new JLabel(" ", JLabel.CENTER);
+		serverHealth = new JLabel(" ", JLabel.CENTER);
 		serverHealth.setOpaque(true);
 		serverHealth.setBackground(Color.RED);
-		
+
 		rightUpperButtonPanel.add(connectButton);
 		rightUpperButtonPanel.add(disconnectButton);
 		rightUpperButtonPanel.add(restartButton);
@@ -183,13 +181,10 @@ public class MainGui extends JFrame implements ControlListener,ActionListener {
 		rightMiddlePanel.add(serverInfoLabel, BorderLayout.NORTH);
 		rightLowerPanel.add(serverConnection, BorderLayout.NORTH);
 		rightLowerPanel.add(serverHealth, BorderLayout.CENTER);
-		
 
 		// TODO Separators
-		leftPanel.add(new JSeparator(SwingConstants.VERTICAL),
-				BorderLayout.EAST);
-		innerCenterLowerPanel.add(new JSeparator(SwingConstants.HORIZONTAL),
-				BorderLayout.CENTER);
+		leftPanel.add(new JSeparator(SwingConstants.VERTICAL), BorderLayout.EAST);
+		innerCenterLowerPanel.add(new JSeparator(SwingConstants.HORIZONTAL), BorderLayout.CENTER);
 
 		// TODO Actions
 		sendButton.addActionListener(this);
@@ -201,45 +196,56 @@ public class MainGui extends JFrame implements ControlListener,ActionListener {
 		disconnectButton.addActionListener(this);
 		disconnectButton.setActionCommand("ACTION_COMMAND_DISCONNECT");
 		restartButton.addActionListener(this);
-		restartButton.setActionCommand("ACTION_COMMAND_RESET");		
-		
+		restartButton.setActionCommand("ACTION_COMMAND_RESET");
+
 		validate();
 	}
 
-	//bei connect von client 
-	private JPanel deviceInformation() {
-		
+
+	// bei connect von client
+	private JPanel deviceInformation()
+	{
+
 		deviceIterator++;
-		if(deviceIterator <= 10) {
-		JPanel devicePanel = new JPanel();
-		devicePanel.setLayout(new BoxLayout(devicePanel, BoxLayout.Y_AXIS));
-		JLabel deviceName = new JLabel("Geraetename: ");
-		JLabel deviceLatency = new JLabel("Latenz:");
-		JLabel deviceVariable = new JLabel("Platzhalter");
-		devicePanel.setSize(new Dimension(200,60));
-		
-		Border border = devicePanel.getBorder();
-		Border margin = new LineBorder(Color.darkGray,4);
-		devicePanel.setBorder(new CompoundBorder(border, margin));
-		
-		devicePanel.add(deviceName);
-		devicePanel.add(deviceLatency);
-		devicePanel.add(deviceVariable);
-		innerCenterUpperPanel.add(devicePanel);
-		devicePanel.revalidate();
-		devicePanel.repaint();
-		return devicePanel;
-		} else {	
-			serverHistory.append("Es sind zu viele Gerï¿½te angemeldet!"); 
+		if (deviceIterator <= 10)
+		{
+			JPanel devicePanel = new JPanel();
+			devicePanel.setLayout(new BoxLayout(devicePanel, BoxLayout.Y_AXIS));
+			JLabel deviceName = new JLabel("Geraetename: ");
+			JLabel deviceLatency = new JLabel("Latenz:");
+			JLabel deviceVariable = new JLabel("Platzhalter");
+			devicePanel.setSize(new Dimension(200, 60));
+
+			Border border = devicePanel.getBorder();
+			Border margin = new LineBorder(Color.darkGray, 4);
+			devicePanel.setBorder(new CompoundBorder(border, margin));
+
+			devicePanel.add(deviceName);
+			devicePanel.add(deviceLatency);
+			devicePanel.add(deviceVariable);
+			innerCenterUpperPanel.add(devicePanel);
+			devicePanel.revalidate();
+			devicePanel.repaint();
+			return devicePanel;
+		}
+		else
+		{
+			serverHistory.append("Es sind zu viele Gerï¿½te angemeldet!");
 			return null;
 		}
 	}
-	
-	public void actionPerformed(ActionEvent e) {// TODO Das ganze kann bzw soll in den controller... in der GUIkeine "logik" sondern nur infos fÃ¼r den controller(also das command enfch eeitercgebb ) guck dir dss beim clientact und controller in der app an
-		
-		if (e.getActionCommand().equals("ACTION_COMMAND_SEND")) {
+
+
+	public void actionPerformed(ActionEvent e)
+	{// TODO Das ganze kann bzw soll in den controller... in der GUIkeine "logik"
+		// sondern nur infos fÃ¼r den controller(also das command enfch
+		// eeitercgebb ) guck dir dss beim clientact und controller in der app an
+
+		if (e.getActionCommand().equals("ACTION_COMMAND_SEND"))
+		{
 			final String fromUser = userInputField.getText();
-			if (!(fromUser.equals(""))) {
+			if (!(fromUser.equals("")))
+			{
 				Date date = new Date();
 				SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
 				String formattedDate = sdf.format(date);
@@ -248,79 +254,85 @@ public class MainGui extends JFrame implements ControlListener,ActionListener {
 				chatHistory.append("\"User\": ");
 				chatHistory.append(fromUser);
 				chatHistory.append("\n");
-				chatHistory.setCaretPosition(chatHistory.getDocument()
-						.getLength());
-				chatHistory.setCaretPosition(chatHistory.getDocument()
-						.getLength());
+				chatHistory.setCaretPosition(chatHistory.getDocument().getLength());
+				chatHistory.setCaretPosition(chatHistory.getDocument().getLength());
 
 				userInputField.setText("");
 			}
 		}// end if
 
-		if (e.getActionCommand().equals("ACTION_COMMAND_CONNECT")) {
+		if (e.getActionCommand().equals("ACTION_COMMAND_CONNECT"))
+		{
 			ControlAction ca = ctrl.getNewAction();
 			ca.setAction(Controller.START_SERVER);
 			tryAction(ca);
-			//TODO Server message an die GUI, in die ServerHistory!
-			//"Server ist gestartet" oder was da reinkommt...
+			// TODO Server message an die GUI, in die ServerHistory!
+			// "Server ist gestartet" oder was da reinkommt...
 		}
 
-		if (e.getActionCommand().equals("ACTION_COMMAND_DISCONNECT")) {
+		if (e.getActionCommand().equals("ACTION_COMMAND_DISCONNECT"))
+		{
 			// TODO WENN nicht mehr verbunden mit dem server -> ausgabe oder
-			//wenn disconnect gedrückt würde
+			// wenn disconnect gedrückt würde
 			ControlAction ca = ctrl.getNewAction();
 			ca.setAction(Controller.STOP_SERVER);
 			tryAction(ca);
-			//TODO genauso hier. möglichst wie unten
-//			serverHistory.append("Verbindung zum Server unterbrochen!");
-//			serverHistory.append(PLACEHOLDER);
-//			serverHealth.setBackground(Color.RED);
+			// TODO genauso hier. möglichst wie unten
+			// serverHistory.append("Verbindung zum Server unterbrochen!");
+			// serverHistory.append(PLACEHOLDER);
+			// serverHealth.setBackground(Color.RED);
 		}// end if
 
-		if (e.getActionCommand().equals("ACTION_COMMAND_RESET")) {
+		if (e.getActionCommand().equals("ACTION_COMMAND_RESET"))
+		{
 			Object[] options = { "Ja, bitte!", "Nein danke!" };
-			int choice = JOptionPane.showOptionDialog(null,
-					"Soll der Server neu gestartet werden?", "Server neustart",
-					JOptionPane.YES_NO_CANCEL_OPTION,
-					JOptionPane.DEFAULT_OPTION, null, options, options[1]);
+			int choice = JOptionPane.showOptionDialog(null, "Soll der Server neu gestartet werden?", "Server neustart", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.DEFAULT_OPTION, null, options, options[1]);
 
-			if (choice == 0) {
+			if (choice == 0)
+			{
 				ControlAction ca = ctrl.getNewAction();
 				ca.setAction(Controller.STOP_SERVER);
 				tryAction(ca);
 				ca.setAction(Controller.START_SERVER);
 				tryAction(ca);
-				//TODO same procedure as every method? YES as EVERY method
-				//extra abfrage noch integrieren ?
-//				serverHistory.append("Server wird neu gestartet!");
-//				serverHistory.append(PLACEHOLDER);
+				// TODO same procedure as every method? YES as EVERY method
+				// extra abfrage noch integrieren ?
+				// serverHistory.append("Server wird neu gestartet!");
+				// serverHistory.append(PLACEHOLDER);
 				// TODO Was passiert, wenn der server neugestartet werden soll
 			}
 		}// end if
 
-		if (e.getActionCommand().equals("ACTION_COMMAND_CLOSE")) {
+		if (e.getActionCommand().equals("ACTION_COMMAND_CLOSE"))
+		{
 			System.exit(EXIT_ON_CLOSE);
 		}
 	}
-	
+
+
 	public void tryAction(ControlAction ca)
 	{
 		ctrl.scheduleAction(ca);
 	}
-	
+
+
 	public void setServerHistory(String s)
 	{
 		String PLACEHOLDER = " _____________\n";
 		serverHistory.append(s);
 		serverHistory.append(PLACEHOLDER);
-		
+
 	}
+
 
 	public void setServerHealth(boolean b)
 	{
 		serverHealth.setBackground(new Color(0, 180, 0));
 	}
-	private void menuBar() {
+
+
+	private void menuBar()
+	{
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 
@@ -346,25 +358,36 @@ public class MainGui extends JFrame implements ControlListener,ActionListener {
 		exitEntry.setActionCommand("ACTION_COMMAND_CLOSE");
 	}
 
-	public static void systemLookandFeel() {
-		try {
+
+	public static void systemLookandFeel()
+	{
+		try
+		{
 			// Set System L&F
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (UnsupportedLookAndFeelException e) {
+		}
+		catch (UnsupportedLookAndFeelException e)
+		{
 			System.err.println("Unsupported Look and Feel Exception!");
-		} catch (ClassNotFoundException e) {
+		}
+		catch (ClassNotFoundException e)
+		{
 			System.err.println("Class not found Exception!");
-		} catch (InstantiationException e) {
+		}
+		catch (InstantiationException e)
+		{
 			System.err.println("Instantiation Exception!");
-		} catch (IllegalAccessException e) {
+		}
+		catch (IllegalAccessException e)
+		{
 			System.err.println("Illegal Acces Exception!");
 		}
 	}
 
+
 	@Override
 	public void addController(ControlHandler ah)
 	{
-		// TODO Auto-generated method stub
-		
+		ctrl = ah;
 	}
 }

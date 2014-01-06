@@ -24,6 +24,7 @@ public class Controller implements ControlHandler
 	{
 		this.server = new TCPServer();
 		this.server.addController(this);
+		
 		this.gui = new MainGui();
 		this.gui.addController(this);
 
