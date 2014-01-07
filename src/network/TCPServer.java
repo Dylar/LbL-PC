@@ -25,7 +25,6 @@ public class TCPServer implements Server
 	public final static String					TAG	= "TCPServer: ";
 	public static int								idCount;
 
-	
 	// DESIGNATE A PORT
 	public int										serverport;
 	public ControlHandler						ctrl;
@@ -53,18 +52,21 @@ public class TCPServer implements Server
 	{
 		this.ctrl = ch;
 	}
-	
+
+
 	@Override
 	public void tryAction(ControlAction ca)
 	{
 		ctrl.scheduleAction(ca);
 	}
 
+
 	@Override
 	public State getState()
 	{
 		return state;
 	}
+
 
 	@Override
 	public void startServer()
@@ -145,6 +147,7 @@ public class TCPServer implements Server
 		}
 	}
 
+
 	@Override
 	public synchronized void addCommandToOutput(NetworkCommand nc)
 	{
@@ -214,15 +217,15 @@ public class TCPServer implements Server
 		{
 			// TODO
 			System.out.println(TAG + ID + " read income");
-			
+
 			ControlAction ca = ctrl.getNewAction();
 			ca.setAction(Integer.valueOf(in.readLine()));
-			
+
 			switch (ca.action)
 			{
 				case ControlHandler.SEND_ID:// Get ID
-//					setID();
-//					ca.setID(ID);
+					// setID();
+					// ca.setID(ID);
 					System.out.println(TAG + ID + " GET ID");
 					break;
 				case ControlHandler.SEND_MESSAGE: // send Message
@@ -236,7 +239,7 @@ public class TCPServer implements Server
 				default:
 					break;
 			}
-			
+
 			tryAction(ca);
 		}
 
@@ -282,15 +285,16 @@ public class TCPServer implements Server
 						System.out.println(TAG + "started connection with ID: " + ID);
 						in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 						out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(client.getOutputStream())), true);
-						
+
 						ControlAction ca = ctrl.getNewAction();
 						ca.setAction(ControlHandler.SEND_ID);
 						ca.setID(ID);
 						tryAction(ca);
-						
+
 						while (state.equals(State.STARTED))
 						{
-							readInput();
+							if (in.ready())
+								readInput();
 
 							if (!clientCommands.isEmpty())
 							{

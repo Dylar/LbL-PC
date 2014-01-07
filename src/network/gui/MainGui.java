@@ -43,7 +43,7 @@ import Control.Controller;
 public class MainGui extends JFrame implements ControlListener,ActionListener {
 
 	// JFrame mainFrame;
-	private Controller ctrl;
+	private ControlHandler ctrl;
 	
 	final private JTextArea serverHistory = new JTextArea(5, 16);
 	final private JTextArea chatHistory = new JTextArea(5, 5);
@@ -364,7 +364,6 @@ public class MainGui extends JFrame implements ControlListener,ActionListener {
 	@Override
 	public void addController(ControlHandler ah)
 	{
-		// TODO Auto-generated method stub
-		
+		ctrl = ah;
 	}
 }
