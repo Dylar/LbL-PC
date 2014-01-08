@@ -30,4 +30,9 @@ public class NetworkCommand
 	{
 		return command;
 	}
+
+	public String getMessage()
+	{
+		return message;
+	}
 }

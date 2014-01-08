@@ -8,16 +8,14 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Queue;
 
 import Control.ControlAction;
 import Control.ControlHandler;
-import Control.Controller;
 
 public class TCPServer implements Server
 {
@@ -31,13 +29,9 @@ public class TCPServer implements Server
 	private ServerSocket							serverSocket;
 
 	private Thread									acceptThread;
-	private Thread									serverOutputThread;
-	// private Thread serverInputThread;
 	private HashMap<Integer, ClientData>	connectedClients;
 
 	private State									state;
-
-	private Queue<NetworkCommand>				outputCommands;
 
 
 	public TCPServer()
@@ -71,18 +65,10 @@ public class TCPServer implements Server
 	@Override
 	public void startServer()
 	{
-		acceptThread = new Thread(new AcceptThread());
-		serverOutputThread = new Thread(new ServerOutputThread());
-		// serverInputThread = new Thread(new ServerInputThread());
-
-		outputCommands = new LinkedList<NetworkCommand>();
 		connectedClients = new HashMap<>();
-
+		
+		acceptThread = new Thread(new AcceptThread());
 		acceptThread.start();
-		serverOutputThread.start();
-		// serverInputThread.start();
-
-		state = State.STARTED;
 	}
 
 
@@ -90,6 +76,28 @@ public class TCPServer implements Server
 	public void stopServer()
 	{
 		state = State.STOPPED;
+		try
+		{
+			serverSocket.close();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public ControlAction getNewAction()
+	{
+		return ctrl.getNewAction();
+	}
+
+	private void appendServerHistory(String s)
+	{
+		ControlAction ca = getNewAction();
+		ca.setAction(ControlHandler.APPEND_SERVER_HISTORY);
+		ca.setMessage(s);
+		tryAction(ca);
 	}
 
 	private class AcceptThread implements Runnable
@@ -101,6 +109,15 @@ public class TCPServer implements Server
 				serverSocket = new ServerSocket(serverport);
 				System.out.println(TAG + "started server");
 
+				state = State.STARTED;
+				
+				ControlAction ca = getNewAction();
+				ca.setAction(ControlHandler.SET_SERVER_HEALTH);
+				ca.setServerHealth(true);
+				tryAction(ca);
+				
+				appendServerHistory("Server started");
+				
 				while (state.equals(State.STARTED))
 				{
 					System.out.println(TAG + "waiting for incoming connections");
@@ -108,7 +125,16 @@ public class TCPServer implements Server
 					addNewConnection(client);
 				}
 			}
-			catch (Exception e)
+			catch (SocketException e)
+			{
+				ControlAction ca = getNewAction();
+				ca.setAction(ControlHandler.SET_SERVER_HEALTH);
+				ca.setServerHealth(false);
+				tryAction(ca);
+				
+				appendServerHistory("Server stopped");
+			}
+			catch (IOException e)
 			{
 				e.printStackTrace();
 			}
@@ -121,46 +147,21 @@ public class TCPServer implements Server
 		connectedClients.put(idCount, new ClientData(client));
 	}
 
-	private class ServerOutputThread implements Runnable
-	{
-		@Override
-		public void run()
-		{
-			System.out.println(TAG + "waiting for output");
-			while (state.equals(State.STARTED))
-			{
-				while (!outputCommands.isEmpty())
-				{
-					NetworkCommand nc = getNextOutputCommand();
-					int id = nc.getID();
-					switch (id)
-					{
-						case -1:
-							pushCommandToAll(nc);
-							break;
-						default:
-							pushCommandToClient(id, nc);
-							break;
-					}
-				}
-			}
-		}
-	}
-
-
 	@Override
 	public synchronized void addCommandToOutput(NetworkCommand nc)
 	{
 		// TODO hier ist dann die schnittstelle von draußen
-		outputCommands.add(nc);
+		int id = nc.getID();
+		switch (id)
+		{
+			case -1:
+				pushCommandToAll(nc);
+				break;
+			default:
+				pushCommandToClient(id, nc);
+				break;
+		}
 	}
-
-
-	private synchronized NetworkCommand getNextOutputCommand()
-	{
-		return outputCommands.poll();
-	}
-
 
 	private void pushCommandToClient(int id, NetworkCommand nc)
 	{
@@ -189,9 +190,7 @@ public class TCPServer implements Server
 		public PrintWriter				out;
 		public BufferedReader			in;
 
-		public Queue<NetworkCommand>	clientCommands;
-
-		public Thread						clientThread;
+		public Thread						clientInput;
 
 
 		private ClientData(Socket client)
@@ -199,10 +198,8 @@ public class TCPServer implements Server
 			this.client = client;
 			setID();
 
-			clientCommands = new LinkedList<NetworkCommand>();
-			clientThread = new Thread(getNewClientRun());
-			clientThread.start();
-
+			clientInput = new Thread(getNewClientInputRun());
+			clientInput.start();
 		}
 
 
@@ -218,28 +215,16 @@ public class TCPServer implements Server
 			// TODO
 			System.out.println(TAG + ID + " read income");
 
-			ControlAction ca = ctrl.getNewAction();
+			ControlAction ca = getNewAction();
 			ca.setAction(Integer.valueOf(in.readLine()));
 
 			switch (ca.action)
 			{
-				case ControlHandler.SEND_ID:// Get ID
-					// setID();
-					// ca.setID(ID);
-					System.out.println(TAG + ID + " GET ID");
-					break;
 				case ControlHandler.SEND_MESSAGE: // send Message
-
-					System.out.println(TAG + ID + " SEND MESSAGE");
-					break;
-				case ControlHandler.GET_MESSAGE: // get message
-
-					System.out.println(TAG + ID + " GET MESSAGE");
-					break;
-				default:
+					ca.setAction(ControlHandler.GET_MESSAGE);
+					ca.setMessage(in.readLine());
 					break;
 			}
-
 			tryAction(ca);
 		}
 
@@ -250,12 +235,16 @@ public class TCPServer implements Server
 			System.out.println(TAG + ID + "write output");
 			switch (nc.getCommand())
 			{
-				case Controller.SEND_ID:
-					out.println(Controller.SEND_ID);
+				case ControlHandler.SEND_ID:
+					out.println(ControlHandler.SEND_ID);
 					out.println(nc.ID);
 					break;
-				default:
-					out.println(TAG + "Hey Server! was geht");
+				case ControlHandler.SEND_MESSAGE:
+					out.println(ControlHandler.SEND_MESSAGE);
+					out.println(nc.getMessage());
+				case ControlHandler.SEND_GESTURE:
+					out.println(ControlHandler.SEND_GESTURE);
+					//TODO hier dann gucken was übertragen werden muss
 					break;
 			}
 			out.flush();
@@ -265,17 +254,10 @@ public class TCPServer implements Server
 		private synchronized void addCommandToClient(NetworkCommand nc)
 		{
 			// TODO hier ist dann die schnittstelle für den Server
-			clientCommands.add(nc);
+			writeOutput(nc);
 		}
 
-
-		private NetworkCommand getNextClientCommand()
-		{
-			return clientCommands.poll();
-		}
-
-
-		private Runnable getNewClientRun()
+		private Runnable getNewClientInputRun()
 		{
 			return new Runnable(){
 				public void run()
@@ -285,22 +267,19 @@ public class TCPServer implements Server
 						System.out.println(TAG + "started connection with ID: " + ID);
 						in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 						out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(client.getOutputStream())), true);
-
-						ControlAction ca = ctrl.getNewAction();
+						
+						ControlAction ca = getNewAction();
 						ca.setAction(ControlHandler.SEND_ID);
 						ca.setID(ID);
 						tryAction(ca);
-
+						
+						appendServerHistory("Client " + ID + ": Connected");
+						
 						while (state.equals(State.STARTED))
 						{
 							if (in.ready())
 								readInput();
-
-							if (!clientCommands.isEmpty())
-							{
-								System.out.println(TAG + ID + " Sending command.");
-								writeOutput(getNextClientCommand());
-							}
+							Thread.sleep(500);
 						}
 
 					}

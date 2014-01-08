@@ -13,6 +13,8 @@ public class ControlAction
 	
 	public int ID;
 
+	public boolean	serverHealth;
+
 	public void setMessage(String message)
 	{
 		this.message = message;
@@ -41,5 +43,10 @@ public class ControlAction
 	public int getID()
 	{
 		return ID;
+	}
+
+	public void setServerHealth(boolean b)
+	{
+		serverHealth = b;
 	}
 }
